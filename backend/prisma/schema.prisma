@@ -1,0 +1,93 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id               String         @id @default(uuid())
+  telegramId       String         @unique
+  username         String?
+  firstName        String
+  lastName         String?
+  monthlyBudget    Float          @default(0) // Oylik limit (UZS)
+  currency         String         @default("UZS")
+  createdAt        DateTime       @default(now())
+
+  subscriptions    Subscription[]
+  groupMemberships GroupMember[]
+}
+
+model Subscription {
+  id              String         @id @default(uuid())
+  userId          String
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name            String         // Netflix, Spotify, etc.
+  category        String         // Entertainment, Work, Health, Utilities, etc.
+  icon            String?        // Emoji or icon name
+  
+  price           Float          // Asl narxi
+  currency        String         @default("UZS") // UZS, USD, EUR, RUB
+  priceInUZS      Float          // Markaziy bank kursi bo'yicha UZS da
+  
+  billingCycle    String         @default("MONTHLY") // MONTHLY, YEARLY
+  firstBillDate   DateTime
+  nextBillingDate DateTime
+  
+  isShared        Boolean        @default(false)
+  groupId         String?
+  group           SubscriptionGroup? @relation(fields: [groupId], references: [id])
+  
+  lastUsedDate    DateTime?      // Inactivity tracker
+  isActive        Boolean        @default(true)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  shares          SubscriptionShare[]
+}
+
+model SubscriptionGroup {
+  id            String         @id @default(uuid())
+  name          String         // Guruh nomi (masalan: "Spotify Family")
+  creatorId     String         // Guruh sardori Telegram ID
+  createdAt     DateTime       @default(now())
+
+  members       GroupMember[]
+  subscriptions Subscription[]
+}
+
+model GroupMember {
+  id        String            @id @default(uuid())
+  groupId   String
+  group     SubscriptionGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      String            @default("MEMBER") // LEADER, MEMBER
+  joinedAt  DateTime          @default(now())
+
+  shares    SubscriptionShare[]
+}
+
+model SubscriptionShare {
+  id             String       @id @default(uuid())
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  memberId       String
+  member         GroupMember  @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  amount         Float        // Ulush summasi (UZS)
+  status         String       @default("PENDING") // PENDING, PAID, CONFIRMED
+  dueBillingDate DateTime
+  paidAt         DateTime?
+  confirmedAt    DateTime?
+}
+
+model ExchangeRate {
+  currency  String   @id // USD, EUR, RUB
+  rate      Float    // 1 Valyuta = X UZS
+  updatedAt DateTime @updatedAt
+}

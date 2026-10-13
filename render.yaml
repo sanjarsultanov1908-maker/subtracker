@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: subtracker
+    runtime: node
+    plan: free
+    buildCommand: npm run build
+    startCommand: npm start
+    envVars:
+      - key: DATABASE_URL
+        value: file:./dev.db
+      - key: BOT_TOKEN
+        sync: false
