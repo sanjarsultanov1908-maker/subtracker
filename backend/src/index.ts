@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
+import fs from 'fs';
 import apiRoutes from './routes/api.routes.js';
 import { BotService } from './services/bot.service.js';
 import { ReminderService } from './services/reminder.service.js';
@@ -14,13 +16,6 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-import path from 'path';
-import fs from 'fs';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 // Asosiy API yo'nalishlari
 app.use('/api', apiRoutes);
 
@@ -29,7 +24,9 @@ app.get('/health', (req, res) => {
 });
 
 // Frontend Mini App statik fayllarini ulash
-const frontendDist = path.resolve(__dirname, '../../frontend/dist');
+const frontendDist = fs.existsSync(path.resolve(process.cwd(), '../frontend/dist'))
+  ? path.resolve(process.cwd(), '../frontend/dist')
+  : path.resolve(process.cwd(), 'frontend/dist');
 if (fs.existsSync(frontendDist)) {
   app.use(express.static(frontendDist));
   app.get('*', (req, res, next) => {
