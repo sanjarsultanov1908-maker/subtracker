@@ -38,8 +38,10 @@ if (fs.existsSync(frontendDist)) {
 async function bootstrap() {
   console.log('🚀 SubTracker Server ishga tushmoqda...');
 
-  // Valyuta kurslarini ilk marta sinxronlash
-  await CbuService.syncRates();
+  // Valyuta kurslarini ilk marta sinxronlash (non-blocking)
+  CbuService.syncRates().catch((err) => {
+    console.warn('⚠️ CBU kurslari ogohlantirish:', (err as Error).message);
+  });
 
   // Telegram botni ishga tushirish
   BotService.init();
