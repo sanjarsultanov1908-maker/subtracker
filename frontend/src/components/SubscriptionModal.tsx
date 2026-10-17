@@ -57,7 +57,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
       setPrice(editData.price);
       setCurrency(editData.currency);
       setBillingCycle(editData.billingCycle);
-      setFirstBillDate(new Date(editData.firstBillDate).toISOString().split('T')[0]);
+      setFirstBillDate(new Date(editData.nextBillingDate || editData.firstBillDate).toISOString().split('T')[0]);
     } else {
       setName('');
       setCategory('Ko\'ngilochar');
@@ -110,7 +110,8 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
         price: numPrice,
         currency,
         billingCycle,
-        firstBillDate: new Date(firstBillDate).toISOString(),
+        nextBillingDate: new Date(firstBillDate).toISOString(),
+        firstBillDate: new Date().toISOString(),
       });
       onClose();
     } catch (err: any) {
@@ -269,7 +270,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
 
           {/* Ilk to'lov sanasi */}
           <div>
-            <label className="text-xs font-medium text-slate-400 mb-1.5 block">To'lov kuni (Sana)</label>
+            <label className="text-xs font-medium text-slate-400 mb-1.5 block">Keyingi to'lov kuni (shu kungacha hisoblanadi)</label>
             <input
               type="date"
               value={firstBillDate}

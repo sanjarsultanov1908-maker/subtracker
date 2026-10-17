@@ -1,5 +1,4 @@
-import React from 'react';
-import { CreditCard, Calendar, Users, BarChart3, Plus, Sparkles } from 'lucide-react';
+import { CreditCard, Calendar, Users, BarChart3, Plus } from 'lucide-react';
 
 interface NavbarProps {
   activeTab: 'subscriptions' | 'calendar' | 'groups' | 'analytics';
@@ -47,9 +46,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <h1 className="font-extrabold text-white text-base tracking-tight">
                   SubTracker
                 </h1>
-                <span className="text-[10px] font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-1.5 py-0.2 rounded-md flex items-center gap-0.5">
-                  <Sparkles className="w-2.5 h-2.5 text-indigo-400" /> PRO
-                </span>
               </div>
               <p className="text-xs text-slate-400 font-medium">
                 {user.firstName || 'Foydalanuvchi'}

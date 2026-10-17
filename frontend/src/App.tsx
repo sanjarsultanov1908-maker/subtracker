@@ -141,7 +141,7 @@ export function App() {
       priceInUZS: preset.price * (rates[preset.currency] || 1),
       billingCycle: 'MONTHLY',
       firstBillDate: new Date().toISOString(),
-      nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      nextBillingDate: new Date().toISOString(),
       isShared: false,
       isActive: true,
     });

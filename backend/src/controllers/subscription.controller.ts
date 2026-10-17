@@ -81,14 +81,12 @@ export class SubscriptionController {
       const curr = currency || 'UZS';
       const priceInUZS = await CbuService.convertToUZS(priceNum, curr);
 
-      // Keyingi to'lov sanasini hisoblash
-      const firstDate = new Date(firstBillDate || new Date());
-      const nextDate = new Date(firstDate);
-      if (billingCycle === 'YEARLY') {
-        nextDate.setFullYear(nextDate.getFullYear() + 1);
-      } else {
-        nextDate.setMonth(nextDate.getMonth() + 1);
-      }
+      // Obuna sanasi bugundan boshlanadi
+      const today = new Date();
+
+      // Foydalanuvchi belgilagan to'lov sanasi
+      const rawDate = req.body.nextBillingDate || req.body.firstBillDate;
+      const targetBillingDate = rawDate ? new Date(rawDate) : new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
 
       const subscription = await prisma.subscription.create({
         data: {
@@ -100,9 +98,9 @@ export class SubscriptionController {
           currency: curr,
           priceInUZS,
           billingCycle: billingCycle || 'MONTHLY',
-          firstBillDate: firstDate,
-          nextBillingDate: nextDate,
-          lastUsedDate: lastUsedDate ? new Date(lastUsedDate) : new Date(),
+          firstBillDate: today,
+          nextBillingDate: targetBillingDate,
+          lastUsedDate: lastUsedDate ? new Date(lastUsedDate) : today,
         },
       });
 
@@ -147,7 +145,9 @@ export class SubscriptionController {
       if (category) updateData.category = category;
       if (icon) updateData.icon = icon;
       if (billingCycle) updateData.billingCycle = billingCycle;
-      if (nextBillingDate) updateData.nextBillingDate = new Date(nextBillingDate);
+      if (nextBillingDate || req.body.firstBillDate) {
+        updateData.nextBillingDate = new Date(nextBillingDate || req.body.firstBillDate);
+      }
       if (lastUsedDate) updateData.lastUsedDate = new Date(lastUsedDate);
       if (isActive !== undefined) updateData.isActive = isActive;
 
