@@ -87,7 +87,7 @@ export function App() {
 
   const handleSaveSubscription = async (formData: any) => {
     try {
-      if (editingSub) {
+      if (editingSub && editingSub.id) {
         await api.updateSubscription(editingSub.id, formData);
         showToast('✅ Obuna o\'zgarishlari saqlandi!', 'success');
       } else {

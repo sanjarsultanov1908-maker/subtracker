@@ -129,7 +129,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
 
         <div className="flex items-center justify-between pb-3.5 border-b border-white/[0.08]">
           <h2 className="text-lg font-extrabold text-white flex items-center gap-2">
-            {editData ? 'Obunani tahrirlash' : 'Yangi obuna qo\'shish'}
+            {editData && editData.id ? 'Obunani tahrirlash' : 'Yangi obuna qo\'shish'}
           </h2>
           <button
             onClick={onClose}
@@ -290,7 +290,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
             ) : (
               <>
                 <Check className="w-4 h-4 stroke-[3]" />
-                <span>{editData ? 'O\'zgarishlarni saqlash' : 'Obunani qo\'shish'}</span>
+                <span>{editData && editData.id ? 'O\'zgarishlarni saqlash' : 'Obunani qo\'shish'}</span>
                 <ArrowRight className="w-4 h-4" />
               </>
             )}

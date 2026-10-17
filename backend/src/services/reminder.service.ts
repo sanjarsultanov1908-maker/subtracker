@@ -120,4 +120,54 @@ export class ReminderService {
       }
     }
   }
+
+  /**
+   * Yangi obuna qo'shilganda yoki sanasi o'zgartirilganda darhol bot orqali xabar berish
+   */
+  static async sendInstantAlert(sub: any, telegramId: string) {
+    try {
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
+
+      const nextDate = new Date(sub.nextBillingDate);
+      nextDate.setHours(0, 0, 0, 0);
+
+      const diffTime = nextDate.getTime() - now.getTime();
+      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+      const formattedPrice = `${sub.price} ${sub.currency}`;
+      const uzsEquivalent = sub.currency !== 'UZS' ? ` (~${Math.round(sub.priceInUZS).toLocaleString()} UZS)` : '';
+
+      if (diffDays === 0) {
+        const text = 
+          `💳 <b>Bugun to'lov kuni!</b>\n\n` +
+          `Xizmat: <b>${sub.name}</b>\n` +
+          `Narxi: <b>${formattedPrice}</b>${uzsEquivalent}\n` +
+          `Kategoriya: ${sub.category}\n\n` +
+          `⚠️ Siz ushbu obuna to'lov sanasini <b>BUGUN</b> deb belgiladingiz. Balansingizni tekshirib qo'ying!`;
+        await BotService.sendMessage(telegramId, text);
+      } else if (diffDays === 1) {
+        const text = 
+          `⚠️ <b>Ertaga to'lov kuni!</b>\n\n` +
+          `Ertaga <b>${sub.name}</b> obunasi uchun <b>${formattedPrice}</b>${uzsEquivalent} to'lov kutilmoqda.`;
+        await BotService.sendMessage(telegramId, text);
+      } else if (diffDays === 3) {
+        const text = 
+          `🔔 <b>SubTracker Eslatma (3 kun qoldi):</b>\n\n` +
+          `<b>${sub.name}</b> obunasi bo'yicha to'lov sanasi: <b>${nextDate.toLocaleDateString('uz-UZ')}</b>\n` +
+          `Summa: <b>${formattedPrice}</b>${uzsEquivalent}`;
+        await BotService.sendMessage(telegramId, text);
+      } else {
+        const text = 
+          `🎉 <b>Yangi obuna qo'shildi:</b>\n\n` +
+          `📌 Xizmat: <b>${sub.name}</b>\n` +
+          `💰 Narxi: <b>${formattedPrice}</b>${uzsEquivalent}\n` +
+          `🗓 Keyingi to'lov: <b>${nextDate.toLocaleDateString('uz-UZ')}</b> (${diffDays} kun qoldi)\n\n` +
+          `<i>To'lov kunidan 3 kun, 1 kun oldin va to'lov kuni ertalab sizga avtomatik eslatma yuboriladi!</i>`;
+        await BotService.sendMessage(telegramId, text);
+      }
+    } catch (err) {
+      console.error('Instant alert xatosi:', err);
+    }
+  }
 }

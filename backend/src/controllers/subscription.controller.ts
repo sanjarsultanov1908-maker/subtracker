@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { prisma } from '../prisma.js';
 import { CbuService } from '../services/cbu.service.js';
+import { ReminderService } from '../services/reminder.service.js';
 
 export class SubscriptionController {
   /**
@@ -126,6 +127,11 @@ export class SubscriptionController {
         }
       }
 
+      // Foydalanuvchiga Telegram bot orqali darhol xabarnoma yuborish
+      ReminderService.sendInstantAlert(subscription, user.telegramId).catch((err) => {
+        console.error('Instant notification yuborishda xatolik:', err);
+      });
+
       res.status(201).json({ subscription, limitWarning });
     } catch (error) {
       res.status(500).json({ error: (error as Error).message });
@@ -165,7 +171,15 @@ export class SubscriptionController {
       const updated = await prisma.subscription.update({
         where: { id },
         data: updateData,
+        include: { user: true },
       });
+
+      // Agar to'lov sanasi o'zgartirilgan bo'lsa, foydalanuvchiga yangi sana haqida darhol xabar berish
+      if (updateData.nextBillingDate) {
+        ReminderService.sendInstantAlert(updated, updated.user.telegramId).catch((err) => {
+          console.error('Instant notification yuborishda xatolik:', err);
+        });
+      }
 
       res.json(updated);
     } catch (error) {
