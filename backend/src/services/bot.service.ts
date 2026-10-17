@@ -27,13 +27,17 @@ export class BotService {
       const username = from.username || '';
 
       // Foydalanuvchini bazada saqlash yoki yangilash
-      await prisma.user.upsert({
-        where: { telegramId },
-        update: { firstName, lastName, username },
-        create: { telegramId, firstName, lastName, username },
-      });
+      try {
+        await prisma.user.upsert({
+          where: { telegramId },
+          update: { firstName, lastName, username },
+          create: { telegramId, firstName, lastName, username },
+        });
+      } catch (dbErr) {
+        console.error('Bazada foydalanuvchini saqlashda xatolik:', dbErr);
+      }
 
-      const webAppUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      const webAppUrl = process.env.FRONTEND_URL || process.env.RENDER_EXTERNAL_URL || 'https://subtracker-rxu8.onrender.com';
       const isHttps = webAppUrl.startsWith('https://');
 
       let keyboard = undefined;
@@ -43,7 +47,7 @@ export class BotService {
         keyboard = new InlineKeyboard().webApp('📱 SubTracker-ni ochish', webAppUrl);
         appText = 'Quyidagi tugma orqali ilovani ishga tushiring 👇';
       } else {
-        appText = `🌐 <b>Ilovani brauzerda ochish havolasi:</b>\n👉 <a href="${webAppUrl}">${webAppUrl}</a>\n\n<i>(Telegram Mini App tugmasi chiqishi uchun https tunnel/domen kerak)</i>`;
+        appText = `🌐 <b>Ilovani brauzerda ochish havolasi:</b>\n👉 <a href="${webAppUrl}">${webAppUrl}</a>`;
       }
 
       await ctx.reply(
